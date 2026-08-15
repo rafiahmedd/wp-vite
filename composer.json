@@ -1,0 +1,64 @@
+{
+    "name": "yourvendor/wp-vite",
+    "description": "Vite integration for WordPress plugin and theme development — handles JS modules, CSS, React HMR, dev/prod modes, and more.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "wordpress",
+        "vite",
+        "asset",
+        "javascript",
+        "css",
+        "react",
+        "hmr",
+        "plugin",
+        "theme"
+    ],
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0 || ^11.0",
+        "squizlabs/php_codesniffer": "^3.9",
+        "wp-coding-standards/wpcs": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WpVite\\": "src/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WpVite\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "test":          "phpunit --no-coverage",
+        "test:coverage": "phpunit",
+        "lint":          "phpcs --standard=phpcs.xml.dist",
+        "fix":           "phpcbf --standard=phpcs.xml.dist",
+        "check":         ["@lint", "@test"]
+    },
+    "scripts-descriptions": {
+        "test":          "Run PHPUnit test suite.",
+        "test:coverage": "Run PHPUnit with code coverage (requires Xdebug).",
+        "lint":          "Check code style with PHPCS.",
+        "fix":           "Auto-fix code style with PHPCBF.",
+        "check":         "Run lint + tests (mirrors CI)."
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    }
+}

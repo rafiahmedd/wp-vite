@@ -1,0 +1,36 @@
+{
+    "name": "@yourvendor/wp-vite",
+    "version": "1.0.0",
+    "description": "Vite plugin for WordPress plugin and theme development",
+    "type": "module",
+    "main": "./js/src/index.js",
+    "exports": {
+        ".": {
+            "types": "./types/index.d.ts",
+            "default": "./js/src/index.js"
+        }
+    },
+    "types": "./types/index.d.ts",
+    "files": [
+        "js/src",
+        "types"
+    ],
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "test:syntax": "node --input-type=module < js/src/index.js && echo 'JS syntax OK'"
+    },
+    "peerDependencies": {
+        "vite": ">=4.0.0"
+    },
+    "keywords": [
+        "wordpress",
+        "vite",
+        "hmr",
+        "react",
+        "plugin",
+        "theme",
+        "assets"
+    ],
+    "license": "MIT"
+}

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<ruleset name="WP Vite">
+    <description>Coding standards for WP Vite — WordPress + PSR-4</description>
+
+    <!-- Files to check -->
+    <file>src</file>
+    <file>tests</file>
+
+    <!-- Exclude generated / vendor files -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/coverage/*</exclude-pattern>
+
+    <!-- PHP version -->
+    <config name="php_version" value="80000"/>
+
+    <!-- ─── WordPress Coding Standards ─────────────────────────────────── -->
+    <rule ref="WordPress">
+        <!-- We use PSR-4 namespaces and class files, not WP file naming. -->
+        <exclude name="WordPress.Files.FileName"/>
+
+        <!-- We use strict types; wp_die() is wrapped in our own helpers. -->
+        <exclude name="WordPress.Security.EscapeOutput.OutputNotEscaped"/>
+
+        <!-- Heredoc/nowdoc is used intentionally in DevServer for React preamble. -->
+        <exclude name="Squiz.Strings.DoubleQuoteUsage.ContainsVar"/>
+    </rule>
+
+    <!-- ─── PSR-4 class naming ──────────────────────────────────────────── -->
+    <rule ref="PSR1.Classes.ClassDeclaration"/>
+    <rule ref="PSR2.Namespaces.UseDeclaration"/>
+
+    <!-- ─── Allow short-form type hints (PHP 8.0+) ──────────────────────── -->
+    <rule ref="Generic.PHP.LowerCaseType"/>
+
+    <!-- ─── Minimum PHP version for syntax checks ───────────────────────── -->
+    <rule ref="PHPCompatibilityWP">
+        <properties>
+            <property name="testVersion" value="8.0-"/>
+        </properties>
+    </rule>
+</ruleset>
