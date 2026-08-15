@@ -21,13 +21,13 @@
 ### PHP (Composer)
 
 ```bash
-composer require yourvendor/wp-vite
+composer require rafiahmedd/wp-vite
 ```
 
 ### JS (npm / pnpm / yarn)
 
 ```bash
-npm install -D @yourvendor/wp-vite
+npm install -D @rafiahmedd/wp-vite
 ```
 
 ---

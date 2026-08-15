@@ -1,5 +1,5 @@
 {
-    "name": "yourvendor/wp-vite",
+    "name": "rafiahmedd/wp-vite",
     "description": "Vite integration for WordPress plugin and theme development — handles JS modules, CSS, React HMR, dev/prod modes, and more.",
     "type": "library",
     "license": "MIT",

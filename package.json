@@ -1,5 +1,5 @@
 {
-    "name": "@yourvendor/wp-vite",
+    "name": "@rafiahmedd/wp-vite",
     "version": "1.0.0",
     "description": "Vite plugin for WordPress plugin and theme development",
     "type": "module",
