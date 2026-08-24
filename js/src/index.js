@@ -11,7 +11,8 @@
  *                        are not included in your bundle.
  */
 
-import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
+import { createConnection } from 'node:net';
 import { resolve, join } from 'node:path';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -126,9 +127,35 @@ export function wpVite(options = {}) {
         },
 
         // ── Build start ──────────────────────────────────────────────────────
-        buildStart() {
-            // Remove any leftover dev manifest before a production build.
-            removeFile(join(resolvedOutDir, DEV_MANIFEST_FILE));
+        async buildStart() {
+            const devManifestPath = join(resolvedOutDir, DEV_MANIFEST_FILE);
+
+            /*
+             * Remove a LEFTOVER dev manifest, never a live one.
+             *
+             * Deleting unconditionally meant `npm run build` in a second
+             * terminal silently switched a running `npm run dev` session back
+             * to the built bundle: the dev server keeps serving on its port,
+             * but the file PHP reads to find that port is gone, so
+             * Manifest::load() falls through to the production manifest and
+             * every entry is served from dist. Nothing recreates the file —
+             * it is only written on 'listening' — so the session stays broken
+             * until the dev server is restarted.
+             *
+             * Probing the recorded origin distinguishes the two cases the one
+             * file cannot: unreachable means the writer is gone (crash, kill
+             * -9, close handler that never ran) and the stale file must go,
+             * because it would otherwise point a production site at a dead
+             * localhost port. Reachable means a dev server still owns it.
+             *
+             * Safe in dev too: this runs before our own server listens, so
+             * this build can never mistake itself for the live one.
+             */
+            if (await isOriginReachable(devManifestPath)) {
+                return;
+            }
+
+            removeFile(devManifestPath);
         },
     };
 }
@@ -315,6 +342,58 @@ function ensureDir(dir) {
     if (!existsSync(dir)) {
         mkdirSync(dir, { recursive: true });
     }
+}
+
+/**
+ * Whether the dev server recorded in a dev manifest still accepts connections.
+ *
+ * Resolves false for anything unusable — missing, unparseable, or originless
+ * file, refused connection, or a host that does not answer promptly — so the
+ * caller falls through to deleting a manifest it cannot vouch for.
+ *
+ * @param {string} manifestPath Path to the dev manifest.
+ * @returns {Promise<boolean>}
+ */
+function isOriginReachable(manifestPath) {
+    /** @type {string | undefined} */
+    let origin;
+
+    try {
+        origin = JSON.parse(readFileSync(manifestPath, 'utf-8')).origin;
+    } catch {
+        return Promise.resolve(false);
+    }
+
+    if (!origin) return Promise.resolve(false);
+
+    /** @type {URL} */
+    let url;
+    try {
+        url = new URL(origin);
+    } catch {
+        return Promise.resolve(false);
+    }
+
+    return new Promise((resolveProbe) => {
+        // ponytail: a TCP connect, not an HTTP request — we only need to know
+        // that something still holds the port. Swap in a fetch of
+        // `${origin}/@vite/client` if a non-Vite squatter on the port ever
+        // becomes a real problem.
+        const socket = createConnection({
+            host: url.hostname,
+            port: Number(url.port) || (url.protocol === 'https:' ? 443 : 80),
+        });
+
+        const settle = (reachable) => {
+            socket.destroy();
+            resolveProbe(reachable);
+        };
+
+        socket.setTimeout(500);
+        socket.once('connect', () => settle(true));
+        socket.once('error', () => settle(false));
+        socket.once('timeout', () => settle(false));
+    });
 }
 
 /**

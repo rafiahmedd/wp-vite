@@ -18,7 +18,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "test:syntax": "node --input-type=module < js/src/index.js && echo 'JS syntax OK'"
+        "test:syntax": "node --input-type=module < js/src/index.js && echo 'JS syntax OK'",
+        "test:js": "node js/test/dev-manifest-preserved.mjs"
     },
     "peerDependencies": {
         "vite": ">=4.0.0"
