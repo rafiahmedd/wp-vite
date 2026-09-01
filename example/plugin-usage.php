@@ -4,7 +4,7 @@
  * Example: using WP Vite in your WordPress plugin
  *
  * After installing via Composer:
- *   composer require yourvendor/wp-vite
+ *   composer require rafiahmedd/wp-vite
  */
 
 declare(strict_types=1);

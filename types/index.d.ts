@@ -2,7 +2,7 @@
  * WP Vite — TypeScript declarations
  *
  * Provides full type information for both exports:
- *   import { wpVite, wpScripts } from '@yourvendor/wp-vite';
+ *   import { wpVite, wpScripts } from '@rafiahmedd/wp-vite';
  */
 
 import type { Plugin } from 'vite';
@@ -70,7 +70,7 @@ export interface WpViteOptions {
  * @example
  * ```js
  * // vite.config.js
- * import { wpVite } from '@yourvendor/wp-vite';
+ * import { wpVite } from '@rafiahmedd/wp-vite';
  *
  * export default {
  *     plugins: [
@@ -114,7 +114,7 @@ export type WpScriptsOverrides = Record<string, string | false>;
  * @example
  * ```js
  * // vite.config.js
- * import { wpVite, wpScripts } from '@yourvendor/wp-vite';
+ * import { wpVite, wpScripts } from '@rafiahmedd/wp-vite';
  * import react from '@vitejs/plugin-react';
  *
  * export default {

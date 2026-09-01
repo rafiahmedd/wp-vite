@@ -45,5 +45,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PHPCS config (`phpcs.xml.dist`) enforcing WordPress coding standards.
 - `.editorconfig` for consistent formatting.
 
-[Unreleased]: https://github.com/yourvendor/wp-vite/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/yourvendor/wp-vite/releases/tag/v1.0.0
+[Unreleased]: https://github.com/rafiahmedd/wp-vite/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/rafiahmedd/wp-vite/releases/tag/v1.0.0

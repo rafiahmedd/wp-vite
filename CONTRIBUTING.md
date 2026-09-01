@@ -149,7 +149,7 @@ CI will run automatically. All checks must pass before a PR can be merged.
 
 ## Reporting Bugs
 
-Please [open an issue](https://github.com/yourvendor/wp-vite/issues/new?template=bug_report.md) and include:
+Please [open an issue](https://github.com/rafiahmedd/wp-vite/issues/new?template=bug_report.md) and include:
 
 - PHP version
 - WordPress version
@@ -161,7 +161,7 @@ Please [open an issue](https://github.com/yourvendor/wp-vite/issues/new?template
 
 ## Requesting Features
 
-[Open a feature request](https://github.com/yourvendor/wp-vite/issues/new?template=feature_request.md). Describe the use case you're trying to solve, not just the implementation you have in mind. This makes it easier to discuss the best approach.
+[Open a feature request](https://github.com/rafiahmedd/wp-vite/issues/new?template=feature_request.md). Describe the use case you're trying to solve, not just the implementation you have in mind. This makes it easier to discuss the best approach.
 
 ---
 

@@ -39,7 +39,7 @@ npm install -D @rafiahmedd/wp-vite
 Create `vite.config.js` in your plugin/theme root:
 
 ```js
-import { wpVite } from '@yourvendor/wp-vite';
+import { wpVite } from '@rafiahmedd/wp-vite';
 
 export default {
     plugins: [
@@ -180,7 +180,7 @@ npm install react react-dom
 Update `vite.config.js`:
 
 ```js
-import { wpVite } from '@yourvendor/wp-vite';
+import { wpVite } from '@rafiahmedd/wp-vite';
 import react from '@vitejs/plugin-react';
 
 export default {
@@ -200,7 +200,7 @@ React Fast Refresh (HMR) is injected automatically during development.
 WordPress ships React, jQuery, and all `@wordpress/*` packages as global scripts. You can tell Vite to exclude them from your bundle using the `wpScripts()` plugin:
 
 ```js
-import { wpVite, wpScripts } from '@yourvendor/wp-vite';
+import { wpVite, wpScripts } from '@rafiahmedd/wp-vite';
 import react from '@vitejs/plugin-react';
 
 export default {

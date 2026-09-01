@@ -4,14 +4,14 @@
  * Copy this to your plugin/theme root and adjust as needed.
  *
  * Install dependencies first:
- *   npm install -D vite @yourvendor/wp-vite
+ *   npm install -D vite @rafiahmedd/wp-vite
  *
  * For React support, also install:
  *   npm install -D @vitejs/plugin-react
  *   npm install react react-dom   (needed as dev deps by @vitejs/plugin-react)
  */
 
-import { wpVite, wpScripts } from '@yourvendor/wp-vite';
+import { wpVite, wpScripts } from '@rafiahmedd/wp-vite';
 
 // ─── Option A: Vanilla JS / Vue / Svelte ─────────────────────────────────────
 export default {
