@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Asset options value object for WP Vite
  *
@@ -15,68 +14,70 @@ namespace WpVite;
  *
  * Default values mirror the reference implementation for easy migration.
  */
-class AssetOptions
-{
-    /**
-     * WordPress script/style handle.
-     */
-    public readonly string $handle;
+class AssetOptions {
 
-    /**
-     * Script dependencies (registered handles).
-     *
-     * @var string[]
-     */
-    public readonly array $dependencies;
+	/**
+	 * WordPress script/style handle.
+	 */
+	public readonly string $handle;
 
-    /**
-     * Style dependencies (registered style handles).
-     *
-     * @var string[]
-     */
-    public readonly array $cssDependencies;
+	/**
+	 * Script dependencies (registered handles).
+	 *
+	 * @var string[]
+	 */
+	public readonly array $dependencies;
 
-    /**
-     * CSS media attribute.
-     */
-    public readonly string $cssMedia;
+	/**
+	 * Style dependencies (registered style handles).
+	 *
+	 * @var string[]
+	 */
+	public readonly array $cssDependencies;
 
-    /**
-     * When true, only CSS assets are enqueued (useful for CSS-only components).
-     */
-    public readonly bool $cssOnly;
+	/**
+	 * CSS media attribute.
+	 */
+	public readonly string $cssMedia;
 
-    /**
-     * Whether to load the script in the footer.
-     */
-    public readonly bool $inFooter;
+	/**
+	 * When true, only CSS assets are enqueued (useful for CSS-only components).
+	 */
+	public readonly bool $cssOnly;
 
-    /**
-     * @param array{
-     *     handle?:           string,
-     *     dependencies?:     string[],
-     *     css-dependencies?: string[],
-     *     css-media?:        string,
-     *     css-only?:         bool,
-     *     in-footer?:        bool,
-     * } $options
-     */
-    public function __construct(array $options)
-    {
-        $parsed = wp_parse_args($options, [
-            'handle'           => '',
-            'dependencies'     => [],
-            'css-dependencies' => [],
-            'css-media'        => 'all',
-            'css-only'         => false,
-            'in-footer'        => false,
-        ]);
+	/**
+	 * Whether to load the script in the footer.
+	 */
+	public readonly bool $inFooter;
 
-        $this->handle          = (string) $parsed['handle'];
-        $this->dependencies    = (array) $parsed['dependencies'];
-        $this->cssDependencies = (array) $parsed['css-dependencies'];
-        $this->cssMedia        = (string) $parsed['css-media'];
-        $this->cssOnly         = (bool) $parsed['css-only'];
-        $this->inFooter        = (bool) $parsed['in-footer'];
-    }
+	/**
+	 * @param array{
+	 *     handle?:           string,
+	 *     dependencies?:     string[],
+	 *     css-dependencies?: string[],
+	 *     css-media?:        string,
+	 *     css-only?:         bool,
+	 *     in-footer?:        bool,
+	 * } $options
+	 */
+	public function __construct( array $options ) {
+		$parsed = wp_parse_args(
+			$options,
+			array(
+				'handle'           => '',
+				'dependencies'     => array(),
+				'css-dependencies' => array(),
+				'css-media'        => 'all',
+				'css-only'         => false,
+				'in-footer'        => false,
+			)
+		);
+
+		$this->handle          = (string) $parsed['handle'];
+		$this->dependencies    = (array) $parsed['dependencies'];
+		$this->cssDependencies = (array) $parsed['css-dependencies'];
+		$this->cssMedia        = (string) $parsed['css-media'];
+		$this->cssOnly         = (bool) $parsed['css-only'];
+		$this->inFooter        = (bool) $parsed['in-footer'];
+	}
 }

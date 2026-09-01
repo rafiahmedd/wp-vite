@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Manifest reader for WP Vite
  *
@@ -20,158 +19,152 @@ use RuntimeException;
  *  - Production Vite 5+: .vite/manifest.json
  *  - Production Vite 4:  manifest.json
  */
-class Manifest
-{
-    /**
-     * Dev server manifest filename (written by our Vite plugin during `npm run dev`).
-     */
-    private const DEV_MANIFEST = 'vite-dev-server.json';
+class Manifest {
 
-    /**
-     * Production manifest path for Vite 5+.
-     */
-    private const PROD_MANIFEST_V5 = '.vite/manifest.json';
+	/**
+	 * Dev server manifest filename (written by our Vite plugin during `npm run dev`).
+	 */
+	private const DEV_MANIFEST = 'vite-dev-server.json';
 
-    /**
-     * Production manifest path for Vite 4.
-     */
-    private const PROD_MANIFEST_V4 = 'manifest.json';
+	/**
+	 * Production manifest path for Vite 5+.
+	 */
+	private const PROD_MANIFEST_V5 = '.vite/manifest.json';
 
-    /**
-     * In-memory cache of loaded manifests, keyed by normalized build dir.
-     *
-     * @var array<string, self>
-     */
-    private static array $cache = [];
+	/**
+	 * Production manifest path for Vite 4.
+	 */
+	private const PROD_MANIFEST_V4 = 'manifest.json';
 
-    private function __construct(
-        private readonly string $dir,
-        private readonly object $data,
-        private readonly bool $isDev,
-    ) {}
+	/**
+	 * In-memory cache of loaded manifests, keyed by normalized build dir.
+	 *
+	 * @var array<string, self>
+	 */
+	private static array $cache = array();
 
-    // -------------------------------------------------------------------------
-    // Factory
-    // -------------------------------------------------------------------------
+	private function __construct(
+		private readonly string $dir,
+		private readonly object $data,
+		private readonly bool $isDev,
+	) {}
 
-    /**
-     * Load (or return a cached) Manifest for the given build directory.
-     *
-     * @param string $buildDir Absolute path to the build/dist directory.
-     *
-     * @throws RuntimeException When no readable manifest file is found or parsing fails.
-     */
-    public static function load(string $buildDir): self
-    {
-        $dir = wp_normalize_path(untrailingslashit($buildDir));
+	// -------------------------------------------------------------------------
+	// Factory
+	// -------------------------------------------------------------------------
 
-        if (isset(self::$cache[$dir])) {
-            return self::$cache[$dir];
-        }
+	/**
+	 * Load (or return a cached) Manifest for the given build directory.
+	 *
+	 * @param string $buildDir Absolute path to the build/dist directory.
+	 *
+	 * @throws RuntimeException When no readable manifest file is found or parsing fails.
+	 */
+	public static function load( string $buildDir ): self {
+		$dir = wp_normalize_path( untrailingslashit( $buildDir ) );
 
-        // Priority: dev > prod v5 > prod v4
-        $candidates = [
-            self::DEV_MANIFEST     => true,
-            self::PROD_MANIFEST_V5 => false,
-            self::PROD_MANIFEST_V4 => false,
-        ];
+		if ( isset( self::$cache[ $dir ] ) ) {
+			return self::$cache[ $dir ];
+		}
 
-        foreach ($candidates as $filename => $isDev) {
-            $path = "{$dir}/{$filename}";
+		// Priority: dev > prod v5 > prod v4
+		$candidates = array(
+			self::DEV_MANIFEST     => true,
+			self::PROD_MANIFEST_V5 => false,
+			self::PROD_MANIFEST_V4 => false,
+		);
 
-            if (! is_file($path) || ! is_readable($path)) {
-                continue;
-            }
+		foreach ( $candidates as $filename => $isDev ) {
+			$path = "{$dir}/{$filename}";
 
-            $data = self::decodeJson($path);
+			if ( ! is_file( $path ) || ! is_readable( $path ) ) {
+				continue;
+			}
 
-            /**
-             * Filters the raw manifest data after it has been read.
-             *
-             * @param object $data        Decoded manifest object.
-             * @param string $dir         Absolute path to the build directory.
-             * @param string $path        Full path to the manifest file.
-             * @param bool   $isDev       Whether this is a dev-server manifest.
-             */
-            $data = apply_filters('wp_vite_manifest_data', $data, $dir, $path, $isDev);
+			$data = self::decodeJson( $path );
 
-            return self::$cache[$dir] = new self($dir, $data, $isDev);
-        }
+			/**
+			 * Filters the raw manifest data after it has been read.
+			 *
+			 * @param object $data        Decoded manifest object.
+			 * @param string $dir         Absolute path to the build directory.
+			 * @param string $path        Full path to the manifest file.
+			 * @param bool   $isDev       Whether this is a dev-server manifest.
+			 */
+			$data = apply_filters( 'wp_vite_manifest_data', $data, $dir, $path, $isDev );
 
-        throw new RuntimeException(
-            sprintf(
-                '[WP Vite] No readable manifest found in "%s". Did you run `npm run dev` or `npm run build`?',
-                $dir,
-            )
-        );
-    }
+			return self::$cache[ $dir ] = new self( $dir, $data, $isDev );
+		}//end foreach
 
-    // -------------------------------------------------------------------------
-    // Getters
-    // -------------------------------------------------------------------------
+		throw new RuntimeException(
+			sprintf(
+				'[WP Vite] No readable manifest found in "%s". Did you run `npm run dev` or `npm run build`?',
+				$dir,
+			)
+		);
+	}
 
-    /**
-     * The decoded manifest data object.
-     */
-    public function getData(): object
-    {
-        return $this->data;
-    }
+	// -------------------------------------------------------------------------
+	// Getters
+	// -------------------------------------------------------------------------
 
-    /**
-     * Absolute path to the build directory.
-     */
-    public function getDir(): string
-    {
-        return $this->dir;
-    }
+	/**
+	 * The decoded manifest data object.
+	 */
+	public function getData(): object {
+		return $this->data;
+	}
 
-    /**
-     * Whether this is a development (HMR) manifest.
-     */
-    public function isDev(): bool
-    {
-        return $this->isDev;
-    }
+	/**
+	 * Absolute path to the build directory.
+	 */
+	public function getDir(): string {
+		return $this->dir;
+	}
 
-    // -------------------------------------------------------------------------
-    // Cache management
-    // -------------------------------------------------------------------------
+	/**
+	 * Whether this is a development (HMR) manifest.
+	 */
+	public function isDev(): bool {
+		return $this->isDev;
+	}
 
-    /**
-     * Clear the manifest cache.
-     *
-     * @param string|null $buildDir Specific directory to clear, or null to clear all.
-     */
-    public static function clearCache(?string $buildDir = null): void
-    {
-        if ($buildDir !== null) {
-            unset(self::$cache[wp_normalize_path(untrailingslashit($buildDir))]);
-            return;
-        }
+	// -------------------------------------------------------------------------
+	// Cache management
+	// -------------------------------------------------------------------------
 
-        self::$cache = [];
-    }
+	/**
+	 * Clear the manifest cache.
+	 *
+	 * @param string|null $buildDir Specific directory to clear, or null to clear all.
+	 */
+	public static function clearCache( ?string $buildDir = null ): void {
+		if ( $buildDir !== null ) {
+			unset( self::$cache[ wp_normalize_path( untrailingslashit( $buildDir ) ) ] );
+			return;
+		}
 
-    // -------------------------------------------------------------------------
-    // Internals
-    // -------------------------------------------------------------------------
+		self::$cache = array();
+	}
 
-    /**
-     * Decode a JSON manifest file.
-     *
-     * @throws RuntimeException On parse failure.
-     */
-    private static function decodeJson(string $path): object
-    {
-        $data = wp_json_file_decode($path);
+	// -------------------------------------------------------------------------
+	// Internals
+	// -------------------------------------------------------------------------
 
-        if (! $data) {
-            throw new RuntimeException(
-                sprintf('[WP Vite] Failed to parse manifest file: %s', $path)
-            );
-        }
+	/**
+	 * Decode a JSON manifest file.
+	 *
+	 * @throws RuntimeException On parse failure.
+	 */
+	private static function decodeJson( string $path ): object {
+		$data = wp_json_file_decode( $path );
 
-        return $data;
-    }
+		if ( ! $data ) {
+			throw new RuntimeException(
+				sprintf( '[WP Vite] Failed to parse manifest file: %s', $path )
+			);
+		}
+
+		return $data;
+	}
 }

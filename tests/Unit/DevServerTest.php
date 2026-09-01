@@ -17,169 +17,178 @@ use WpVite\Tests\WpViteTestCase;
 /**
  * @covers \WpVite\DevServer
  */
-class DevServerTest extends WpViteTestCase
-{
-    // ─────────────────────────────────────────────────────────────────────────
-    // registerClient()
-    // ─────────────────────────────────────────────────────────────────────────
+class DevServerTest extends WpViteTestCase {
 
-    public function test_registers_vite_client_script(): void
-    {
-        global $wp_scripts;
+	// ─────────────────────────────────────────────────────────────────────────
+	// registerClient()
+	// ─────────────────────────────────────────────────────────────────────────
 
-        $dir      = $this->makeDevBuildDir(['origin' => 'http://localhost:5173', 'base' => '/']);
-        $manifest = Manifest::load($dir);
+	public function test_registers_vite_client_script(): void {
+		global $wp_scripts;
 
-        DevServer::registerClient($manifest);
+		$dir      = $this->makeDevBuildDir(
+			array(
+				'origin' => 'http://localhost:5173',
+				'base'   => '/',
+			)
+		);
+		$manifest = Manifest::load( $dir );
 
-        $this->assertArrayHasKey(DevServer::CLIENT_HANDLE, $wp_scripts);
-        $this->assertStringContainsString('@vite/client', $wp_scripts[DevServer::CLIENT_HANDLE]['src']);
-        $this->assertStringContainsString('localhost:5173', $wp_scripts[DevServer::CLIENT_HANDLE]['src']);
-    }
+		DevServer::registerClient( $manifest );
 
-    public function test_registers_client_only_once(): void
-    {
-        global $wp_scripts;
+		$this->assertArrayHasKey( DevServer::CLIENT_HANDLE, $wp_scripts );
+		$this->assertStringContainsString( '@vite/client', $wp_scripts[ DevServer::CLIENT_HANDLE ]['src'] );
+		$this->assertStringContainsString( 'localhost:5173', $wp_scripts[ DevServer::CLIENT_HANDLE ]['src'] );
+	}
 
-        $dir      = $this->makeDevBuildDir();
-        $manifest = Manifest::load($dir);
+	public function test_registers_client_only_once(): void {
+		global $wp_scripts;
 
-        DevServer::registerClient($manifest);
-        DevServer::registerClient($manifest); // second call — should no-op
+		$dir      = $this->makeDevBuildDir();
+		$manifest = Manifest::load( $dir );
 
-        // The script should appear only once in the registry.
-        $handles = array_keys($wp_scripts);
-        $count   = count(array_filter($handles, fn ($h) => $h === DevServer::CLIENT_HANDLE));
+		DevServer::registerClient( $manifest );
+		DevServer::registerClient( $manifest ); // second call — should no-op
 
-        $this->assertSame(1, $count);
-    }
+		// The script should appear only once in the registry.
+		$handles = array_keys( $wp_scripts );
+		$count   = count( array_filter( $handles, fn ( $h ) => $h === DevServer::CLIENT_HANDLE ) );
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // buildUrl()
-    // ─────────────────────────────────────────────────────────────────────────
+		$this->assertSame( 1, $count );
+	}
 
-    public function test_buildUrl_combines_origin_base_entry(): void
-    {
-        $dir = $this->makeDevBuildDir([
-            'origin' => 'http://localhost:5173',
-            'base'   => '/my-plugin',
-        ]);
+	// ─────────────────────────────────────────────────────────────────────────
+	// buildUrl()
+	// ─────────────────────────────────────────────────────────────────────────
 
-        $manifest = Manifest::load($dir);
-        $url      = DevServer::buildUrl($manifest, 'src/main.ts');
+	public function test_buildUrl_combines_origin_base_entry(): void {
+		$dir = $this->makeDevBuildDir(
+			array(
+				'origin' => 'http://localhost:5173',
+				'base'   => '/my-plugin',
+			)
+		);
 
-        $this->assertSame('http://localhost:5173/my-plugin/src/main.ts', $url);
-    }
+		$manifest = Manifest::load( $dir );
+		$url      = DevServer::buildUrl( $manifest, 'src/main.ts' );
 
-    public function test_buildUrl_handles_root_base(): void
-    {
-        $dir = $this->makeDevBuildDir([
-            'origin' => 'https://mydomain.com:5173',
-            'base'   => '/',
-        ]);
+		$this->assertSame( 'http://localhost:5173/my-plugin/src/main.ts', $url );
+	}
 
-        $manifest = Manifest::load($dir);
-        $url      = DevServer::buildUrl($manifest, '@vite/client');
+	public function test_buildUrl_handles_root_base(): void {
+		$dir = $this->makeDevBuildDir(
+			array(
+				'origin' => 'https://mydomain.com:5173',
+				'base'   => '/',
+			)
+		);
 
-        $this->assertSame('https://mydomain.com:5173/@vite/client', $url);
-    }
+		$manifest = Manifest::load( $dir );
+		$url      = DevServer::buildUrl( $manifest, '@vite/client' );
 
-    public function test_buildUrl_collapses_duplicate_slashes(): void
-    {
-        $dir = $this->makeDevBuildDir([
-            'origin' => 'http://localhost:5173',
-            'base'   => '/base/',
-        ]);
+		$this->assertSame( 'https://mydomain.com:5173/@vite/client', $url );
+	}
 
-        $manifest = Manifest::load($dir);
-        $url      = DevServer::buildUrl($manifest, '/src/app.tsx');
+	public function test_buildUrl_collapses_duplicate_slashes(): void {
+		$dir = $this->makeDevBuildDir(
+			array(
+				'origin' => 'http://localhost:5173',
+				'base'   => '/base/',
+			)
+		);
 
-        // Should not have double slashes.
-        $this->assertStringNotContainsString('//', ltrim(str_replace('http://', '', $url), '/'));
-    }
+		$manifest = Manifest::load( $dir );
+		$url      = DevServer::buildUrl( $manifest, '/src/app.tsx' );
 
-    public function test_buildUrl_with_empty_base(): void
-    {
-        $dir = $this->makeDevBuildDir([
-            'origin' => 'http://localhost:5173',
-            'base'   => '',
-        ]);
+		// Should not have double slashes.
+		$this->assertStringNotContainsString( '//', ltrim( str_replace( 'http://', '', $url ), '/' ) );
+	}
 
-        $manifest = Manifest::load($dir);
-        $url      = DevServer::buildUrl($manifest, 'src/main.ts');
+	public function test_buildUrl_with_empty_base(): void {
+		$dir = $this->makeDevBuildDir(
+			array(
+				'origin' => 'http://localhost:5173',
+				'base'   => '',
+			)
+		);
 
-        $this->assertSame('http://localhost:5173/src/main.ts', $url);
-    }
+		$manifest = Manifest::load( $dir );
+		$url      = DevServer::buildUrl( $manifest, 'src/main.ts' );
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // React Refresh preamble
-    // ─────────────────────────────────────────────────────────────────────────
+		$this->assertSame( 'http://localhost:5173/src/main.ts', $url );
+	}
 
-    public function test_injects_react_refresh_preamble_when_plugin_present(): void
-    {
-        global $wp_inline_scripts;
+	// ─────────────────────────────────────────────────────────────────────────
+	// React Refresh preamble
+	// ─────────────────────────────────────────────────────────────────────────
 
-        $dir = $this->makeDevBuildDir([
-            'origin'  => 'http://localhost:5173',
-            'base'    => '/',
-            'plugins' => ['vite:react-refresh', 'wp-vite'],
-        ]);
+	public function test_injects_react_refresh_preamble_when_plugin_present(): void {
+		global $wp_inline_scripts;
 
-        $manifest = Manifest::load($dir);
-        DevServer::registerClient($manifest);
-        DevServer::maybeInjectReactRefresh($manifest);
+		$dir = $this->makeDevBuildDir(
+			array(
+				'origin'  => 'http://localhost:5173',
+				'base'    => '/',
+				'plugins' => array( 'vite:react-refresh', 'wp-vite' ),
+			)
+		);
 
-        $this->assertNotEmpty($wp_inline_scripts, 'React Refresh preamble should be injected as inline script');
+		$manifest = Manifest::load( $dir );
+		DevServer::registerClient( $manifest );
+		DevServer::maybeInjectReactRefresh( $manifest );
 
-        $preambleScript = $wp_inline_scripts[0];
-        $this->assertSame(DevServer::CLIENT_HANDLE, $preambleScript['handle']);
-        $this->assertStringContainsString('RefreshRuntime', $preambleScript['data']);
-        $this->assertStringContainsString('@react-refresh', $preambleScript['data']);
-    }
+		$this->assertNotEmpty( $wp_inline_scripts, 'React Refresh preamble should be injected as inline script' );
 
-    public function test_does_not_inject_preamble_when_react_plugin_absent(): void
-    {
-        global $wp_inline_scripts;
+		$preambleScript = $wp_inline_scripts[0];
+		$this->assertSame( DevServer::CLIENT_HANDLE, $preambleScript['handle'] );
+		$this->assertStringContainsString( 'RefreshRuntime', $preambleScript['data'] );
+		$this->assertStringContainsString( '@react-refresh', $preambleScript['data'] );
+	}
 
-        $dir = $this->makeDevBuildDir([
-            'plugins' => ['vite:vue', 'wp-vite'],
-        ]);
+	public function test_does_not_inject_preamble_when_react_plugin_absent(): void {
+		global $wp_inline_scripts;
 
-        $manifest = Manifest::load($dir);
-        DevServer::registerClient($manifest);
-        DevServer::maybeInjectReactRefresh($manifest);
+		$dir = $this->makeDevBuildDir(
+			array(
+				'plugins' => array( 'vite:vue', 'wp-vite' ),
+			)
+		);
 
-        $this->assertEmpty($wp_inline_scripts);
-    }
+		$manifest = Manifest::load( $dir );
+		DevServer::registerClient( $manifest );
+		DevServer::maybeInjectReactRefresh( $manifest );
 
-    public function test_react_refresh_preamble_injected_only_once(): void
-    {
-        global $wp_inline_scripts;
+		$this->assertEmpty( $wp_inline_scripts );
+	}
 
-        $dir = $this->makeDevBuildDir([
-            'plugins' => ['vite:react-refresh'],
-        ]);
+	public function test_react_refresh_preamble_injected_only_once(): void {
+		global $wp_inline_scripts;
 
-        $manifest = Manifest::load($dir);
-        DevServer::registerClient($manifest);
+		$dir = $this->makeDevBuildDir(
+			array(
+				'plugins' => array( 'vite:react-refresh' ),
+			)
+		);
 
-        DevServer::maybeInjectReactRefresh($manifest);
-        DevServer::maybeInjectReactRefresh($manifest); // second call
+		$manifest = Manifest::load( $dir );
+		DevServer::registerClient( $manifest );
 
-        $preambles = array_filter(
-            $wp_inline_scripts,
-            fn ($s) => str_contains($s['data'], 'RefreshRuntime'),
-        );
+		DevServer::maybeInjectReactRefresh( $manifest );
+		DevServer::maybeInjectReactRefresh( $manifest ); // second call
 
-        $this->assertCount(1, $preambles, 'Preamble should only be injected once per request');
-    }
+		$preambles = array_filter(
+			$wp_inline_scripts,
+			fn ( $s ) => str_contains( $s['data'], 'RefreshRuntime' ),
+		);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // CLIENT_HANDLE constant
-    // ─────────────────────────────────────────────────────────────────────────
+		$this->assertCount( 1, $preambles, 'Preamble should only be injected once per request' );
+	}
 
-    public function test_client_handle_constant_value(): void
-    {
-        $this->assertSame('vite-client', DevServer::CLIENT_HANDLE);
-    }
+	// ─────────────────────────────────────────────────────────────────────────
+	// CLIENT_HANDLE constant
+	// ─────────────────────────────────────────────────────────────────────────
+
+	public function test_client_handle_constant_value(): void {
+		$this->assertSame( 'vite-client', DevServer::CLIENT_HANDLE );
+	}
 }

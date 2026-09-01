@@ -14,9 +14,9 @@ declare(strict_types=1);
 
 $autoloader = __DIR__ . '/../vendor/autoload.php';
 
-if (! file_exists($autoloader)) {
-    echo "\033[31mError:\033[0m vendor/autoload.php not found. Run \033[33mcomposer install\033[0m first.\n";
-    exit(1);
+if ( ! file_exists( $autoloader ) ) {
+	echo "\033[31mError:\033[0m vendor/autoload.php not found. Run \033[33mcomposer install\033[0m first.\n";
+	exit( 1 );
 }
 
 require_once $autoloader;

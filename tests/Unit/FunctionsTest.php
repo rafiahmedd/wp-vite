@@ -16,64 +16,58 @@ use WpVite\Tests\WpViteTestCase;
  * @covers ::wp_vite_enqueue
  * @covers ::wp_vite_register
  */
-class FunctionsTest extends WpViteTestCase
-{
-    // ─────────────────────────────────────────────────────────────────────────
-    // wp_vite_register()
-    // ─────────────────────────────────────────────────────────────────────────
+class FunctionsTest extends WpViteTestCase {
 
-    public function test_wp_vite_register_returns_array_on_success(): void
-    {
-        $dir    = $this->makeProdBuildDir();
-        $assets = wp_vite_register($dir, 'src/main.ts', ['handle' => 'my-plugin']);
+	// ─────────────────────────────────────────────────────────────────────────
+	// wp_vite_register()
+	// ─────────────────────────────────────────────────────────────────────────
 
-        $this->assertIsArray($assets);
-        $this->assertArrayHasKey('scripts', $assets);
-        $this->assertArrayHasKey('styles', $assets);
-    }
+	public function test_wp_vite_register_returns_array_on_success(): void {
+		$dir    = $this->makeProdBuildDir();
+		$assets = wp_vite_register( $dir, 'src/main.ts', array( 'handle' => 'my-plugin' ) );
 
-    public function test_wp_vite_register_returns_null_on_missing_manifest(): void
-    {
-        $assets = wp_vite_register('/tmp/wp-vite-missing-' . uniqid(), 'src/main.ts', ['handle' => 'x']);
+		$this->assertIsArray( $assets );
+		$this->assertArrayHasKey( 'scripts', $assets );
+		$this->assertArrayHasKey( 'styles', $assets );
+	}
 
-        $this->assertNull($assets);
-    }
+	public function test_wp_vite_register_returns_null_on_missing_manifest(): void {
+		$assets = wp_vite_register( '/tmp/wp-vite-missing-' . uniqid(), 'src/main.ts', array( 'handle' => 'x' ) );
 
-    public function test_wp_vite_register_dev_mode(): void
-    {
-        global $wp_scripts;
+		$this->assertNull( $assets );
+	}
 
-        $dir = $this->makeDevBuildDir();
-        wp_vite_register($dir, 'src/main.ts', ['handle' => 'my-plugin']);
+	public function test_wp_vite_register_dev_mode(): void {
+		global $wp_scripts;
 
-        $this->assertArrayHasKey('my-plugin', $wp_scripts);
-    }
+		$dir = $this->makeDevBuildDir();
+		wp_vite_register( $dir, 'src/main.ts', array( 'handle' => 'my-plugin' ) );
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // wp_vite_enqueue()
-    // ─────────────────────────────────────────────────────────────────────────
+		$this->assertArrayHasKey( 'my-plugin', $wp_scripts );
+	}
 
-    public function test_wp_vite_enqueue_returns_true_on_success(): void
-    {
-        $dir    = $this->makeProdBuildDir();
-        $result = wp_vite_enqueue($dir, 'src/main.ts', ['handle' => 'my-plugin']);
+	// ─────────────────────────────────────────────────────────────────────────
+	// wp_vite_enqueue()
+	// ─────────────────────────────────────────────────────────────────────────
 
-        $this->assertTrue($result);
-    }
+	public function test_wp_vite_enqueue_returns_true_on_success(): void {
+		$dir    = $this->makeProdBuildDir();
+		$result = wp_vite_enqueue( $dir, 'src/main.ts', array( 'handle' => 'my-plugin' ) );
 
-    public function test_wp_vite_enqueue_returns_false_on_missing_manifest(): void
-    {
-        $result = wp_vite_enqueue('/tmp/wp-vite-missing-' . uniqid(), 'src/main.ts', ['handle' => 'x']);
+		$this->assertTrue( $result );
+	}
 
-        $this->assertFalse($result);
-    }
+	public function test_wp_vite_enqueue_returns_false_on_missing_manifest(): void {
+		$result = wp_vite_enqueue( '/tmp/wp-vite-missing-' . uniqid(), 'src/main.ts', array( 'handle' => 'x' ) );
 
-    public function test_wp_vite_enqueue_default_options(): void
-    {
-        $dir = $this->makeProdBuildDir();
-        // Should not throw when options are omitted entirely.
-        $result = wp_vite_enqueue($dir, 'src/main.ts');
+		$this->assertFalse( $result );
+	}
 
-        $this->assertIsBool($result);
-    }
+	public function test_wp_vite_enqueue_default_options(): void {
+		$dir = $this->makeProdBuildDir();
+		// Should not throw when options are omitted entirely.
+		$result = wp_vite_enqueue( $dir, 'src/main.ts' );
+
+		$this->assertIsBool( $result );
+	}
 }
