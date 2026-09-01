@@ -33,5 +33,14 @@
         "theme",
         "assets"
     ],
-    "license": "MIT"
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rafiahmedd/wp-vite.git"
+    },
+    "homepage": "https://github.com/rafiahmedd/wp-vite#readme",
+    "bugs": "https://github.com/rafiahmedd/wp-vite/issues",
+    "publishConfig": {
+        "access": "public"
+    }
 }
