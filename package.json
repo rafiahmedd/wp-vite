@@ -1,6 +1,6 @@
 {
     "name": "@rafiahmedd/wp-vite",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "description": "Vite plugin for WordPress plugin and theme development",
     "type": "module",
     "main": "./js/src/index.js",
