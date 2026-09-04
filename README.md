@@ -67,8 +67,12 @@ Add scripts to `package.json`:
 ```php
 <?php
 
+use WpVite\AssetManager;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
 add_action( 'wp_enqueue_scripts', function (): void {
-    wp_vite_enqueue(
+    AssetManager::enqueue(
         __DIR__ . '/dist',
         'src/main.ts',
         [
@@ -121,12 +125,14 @@ The PHP package detects whichever format is present and uses it to resolve hashe
 
 ## PHP API
 
-### `wp_vite_enqueue( $buildDir, $entry, $options )`
+### `AssetManager::enqueue( $buildDir, $entry, $options )`
 
 Register and enqueue a Vite entry point.
 
 ```php
-wp_vite_enqueue(
+use WpVite\AssetManager;
+
+AssetManager::enqueue(
     __DIR__ . '/dist',
     'src/main.tsx',
     [
@@ -140,12 +146,12 @@ wp_vite_enqueue(
 );
 ```
 
-### `wp_vite_register( $buildDir, $entry, $options )`
+### `AssetManager::register( $buildDir, $entry, $options )`
 
 Register only — returns handles you can enqueue yourself later.
 
 ```php
-$assets = wp_vite_register( __DIR__ . '/dist', 'src/main.ts', [
+$assets = AssetManager::register( __DIR__ . '/dist', 'src/main.ts', [
     'handle' => 'my-plugin',
 ] );
 
@@ -155,14 +161,19 @@ wp_enqueue_script( 'my-plugin' );
 wp_enqueue_style( 'my-plugin-main' );
 ```
 
-### OOP alternative
+### Procedural helpers (opt-in)
 
-If you prefer namespaced calls:
+`wp_vite_enqueue()` / `wp_vite_register()` are thin global wrappers. They are
+**not autoloaded** — see [Using this package in more than one
+plugin](#using-this-package-in-more-than-one-plugin) for why. Load them once from
+your bootstrap:
 
 ```php
-use WpVite\AssetManager;
+require_once __DIR__ . '/vendor/autoload.php';
 
-AssetManager::enqueue( __DIR__ . '/dist', 'src/main.tsx', [ 'handle' => 'my-plugin' ] );
+\WpVite\AssetManager::helpers();
+
+wp_vite_enqueue( __DIR__ . '/dist', 'src/main.tsx', [ 'handle' => 'my-plugin' ] );
 AssetManager::register( __DIR__ . '/dist', 'src/admin.ts', [ 'handle' => 'my-admin' ] );
 ```
 
@@ -215,7 +226,7 @@ export default {
 Then declare the handles as dependencies on the PHP side:
 
 ```php
-wp_vite_enqueue( __DIR__ . '/dist', 'src/main.jsx', [
+AssetManager::enqueue( __DIR__ . '/dist', 'src/main.jsx', [
     'handle'       => 'my-plugin',
     'dependencies' => [ 'react', 'react-dom', 'wp-element' ],
 ] );
@@ -270,9 +281,39 @@ wpVite({
 
 ```php
 // plugin.php
-wp_vite_enqueue( __DIR__ . '/dist', 'src/main.ts',  [ 'handle' => 'my-plugin-frontend' ] );
-wp_vite_enqueue( __DIR__ . '/dist', 'src/admin.ts', [ 'handle' => 'my-plugin-admin' ] );
+AssetManager::enqueue( __DIR__ . '/dist', 'src/main.ts',  [ 'handle' => 'my-plugin-frontend' ] );
+AssetManager::enqueue( __DIR__ . '/dist', 'src/admin.ts', [ 'handle' => 'my-plugin-admin' ] );
 ```
+
+---
+
+## Using this package in more than one plugin
+
+WordPress runs every plugin in one PHP process, but Composer resolves
+dependencies per project — so two plugins can each vendor their own copy of this
+package. Three globals are shared across all of them:
+
+**1. `autoload.files` — why the helpers are opt-in.** Composer keys each `files`
+entry by `md5( "<package-name>:<relative-path>" )` and records what it has loaded
+in `$GLOBALS['__composer_autoload_files']`, which every autoloader in the process
+shares. Two plugins vendoring this package produce the *same* key: the first to
+boot requires its copy, and every later plugin's autoloader **skips its own copy
+entirely** — a fatal `Call to undefined function wp_vite_enqueue()`. Prefixing the
+vendored copy does not help, because the key comes from the package name, not the
+contents. Nothing inside a shared package can fix that, so this package ships no
+`autoload.files` at all: call `AssetManager::helpers()` if you want the globals,
+or just use `AssetManager::enqueue()` and never think about it.
+
+**2. The WP script registry.** The HMR client handle is derived from the dev
+server's origin, not hardcoded, so two plugins running separate dev servers no
+longer overwrite each other's `vite-client`. Your *own* handles are still yours to
+keep unique — prefix them with your plugin slug.
+
+**3. The `WpVite\` namespace and the `wp_vite_*` filters.** Whichever autoloader
+registers first owns the namespace for the request, so a site running two plugins
+with different versions of this package silently runs one of them against the
+other's code. If you ship to wordpress.org, prefix your vendored copy
+(php-scoper, or an equivalent build step).
 
 ---
 
@@ -321,7 +362,7 @@ wp-vite/
 │   ├── Manifest.php             Manifest reader, cache, Vite 4+5 support
 │   ├── ScriptModuleFilter.php   type="module" injection (WP 6.2+ + fallback)
 │   ├── UrlResolver.php          Filesystem path → public WordPress URL
-│   └── functions.php            wp_vite_enqueue() / wp_vite_register()
+│   └── functions.php            wp_vite_enqueue() / wp_vite_register() — opt-in
 ├── tests/
 │   ├── Stubs/wordpress.php      WP function stubs — no WP install needed
 │   ├── Unit/                    One test class per src/ class (7 files)

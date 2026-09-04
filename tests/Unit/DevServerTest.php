@@ -36,9 +36,9 @@ class DevServerTest extends WpViteTestCase {
 
 		DevServer::registerClient( $manifest );
 
-		$this->assertArrayHasKey( DevServer::CLIENT_HANDLE, $wp_scripts );
-		$this->assertStringContainsString( '@vite/client', $wp_scripts[ DevServer::CLIENT_HANDLE ]['src'] );
-		$this->assertStringContainsString( 'localhost:5173', $wp_scripts[ DevServer::CLIENT_HANDLE ]['src'] );
+		$this->assertArrayHasKey( DevServer::clientHandle( $manifest ), $wp_scripts );
+		$this->assertStringContainsString( '@vite/client', $wp_scripts[ DevServer::clientHandle( $manifest ) ]['src'] );
+		$this->assertStringContainsString( 'localhost:5173', $wp_scripts[ DevServer::clientHandle( $manifest ) ]['src'] );
 	}
 
 	public function test_registers_client_only_once(): void {
@@ -52,7 +52,7 @@ class DevServerTest extends WpViteTestCase {
 
 		// The script should appear only once in the registry.
 		$handles = array_keys( $wp_scripts );
-		$count   = count( array_filter( $handles, fn ( $h ) => $h === DevServer::CLIENT_HANDLE ) );
+		$count   = count( array_filter( $handles, fn ( $h ) => $h === DevServer::clientHandle( $manifest ) ) );
 
 		$this->assertSame( 1, $count );
 	}
@@ -140,7 +140,7 @@ class DevServerTest extends WpViteTestCase {
 		$this->assertNotEmpty( $wp_inline_scripts, 'React Refresh preamble should be injected as inline script' );
 
 		$preambleScript = $wp_inline_scripts[0];
-		$this->assertSame( DevServer::CLIENT_HANDLE, $preambleScript['handle'] );
+		$this->assertSame( DevServer::clientHandle( $manifest ), $preambleScript['handle'] );
 		$this->assertStringContainsString( 'RefreshRuntime', $preambleScript['data'] );
 		$this->assertStringContainsString( '@react-refresh', $preambleScript['data'] );
 	}
@@ -188,7 +188,15 @@ class DevServerTest extends WpViteTestCase {
 	// CLIENT_HANDLE constant
 	// ─────────────────────────────────────────────────────────────────────────
 
-	public function test_client_handle_constant_value(): void {
-		$this->assertSame( 'vite-client', DevServer::CLIENT_HANDLE );
+	public function test_client_handle_is_per_dev_server(): void {
+		$a = Manifest::load( $this->makeDevBuildDir( array( 'origin' => 'http://localhost:5173' ) ) );
+		$b = Manifest::load( $this->makeDevBuildDir( array( 'origin' => 'http://localhost:5174' ) ) );
+
+		$this->assertStringStartsWith( DevServer::CLIENT_HANDLE . '-', DevServer::clientHandle( $a ) );
+
+		// Two plugins, two dev servers, one global WP script registry: distinct
+		// handles or the second plugin loads the first one's dev server.
+		$this->assertNotSame( DevServer::clientHandle( $a ), DevServer::clientHandle( $b ) );
+		$this->assertSame( DevServer::clientHandle( $a ), DevServer::clientHandle( Manifest::load( $this->makeDevBuildDir( array( 'origin' => 'http://localhost:5173' ) ) ) ) );
 	}
 }

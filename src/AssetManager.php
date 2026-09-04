@@ -36,6 +36,19 @@ class AssetManager {
 	// -------------------------------------------------------------------------
 
 	/**
+	 * Define the procedural wrappers wp_vite_enqueue() / wp_vite_register().
+	 *
+	 * Opt-in because Composer's `autoload.files` cannot be shared safely by two
+	 * WordPress plugins in one process — see the header of src/functions.php.
+	 * Call this once from your plugin bootstrap if you want the global style;
+	 * calling it from several plugins is harmless, the functions guard
+	 * themselves with function_exists().
+	 */
+	public static function helpers(): void {
+		require_once __DIR__ . '/functions.php';
+	}
+
+	/**
 	 * Register a Vite entry-point and return the resulting script/style handles.
 	 *
 	 * Returns null when the manifest cannot be found (only if WP_DEBUG is off).
@@ -116,10 +129,10 @@ class AssetManager {
 		string $entry,
 		AssetOptions $opts,
 	): ?array {
-		DevServer::registerClient( $manifest );
+		$clientHandle = DevServer::registerClient( $manifest );
 		DevServer::maybeInjectReactRefresh( $manifest );
 
-		$deps = array_merge( array( DevServer::CLIENT_HANDLE ), $opts->dependencies );
+		$deps = array_merge( array( $clientHandle ), $opts->dependencies );
 		$src  = DevServer::buildUrl( $manifest, $entry );
 
 		ScriptModuleFilter::apply( $opts->handle );

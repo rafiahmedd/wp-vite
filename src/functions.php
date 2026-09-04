@@ -1,14 +1,29 @@
 <?php
 /**
- * Procedural helper functions for WP Vite
+ * Procedural helper functions for WP Vite — OPT-IN, not autoloaded.
  *
- * These are thin wrappers around AssetManager. Use whichever style you prefer:
+ * Load them once, early, from your plugin bootstrap:
  *
- *   // Procedural (global functions):
+ *   require_once __DIR__ . '/vendor/autoload.php';
+ *   \WpVite\AssetManager::helpers();
+ *
  *   wp_vite_enqueue( __DIR__ . '/dist', 'src/main.tsx', [ 'handle' => 'my-plugin' ] );
  *
- *   // OOP (static calls):
- *   \WpVite\AssetManager::enqueue( __DIR__ . '/dist', 'src/main.tsx', [ 'handle' => 'my-plugin' ] );
+ * WHY THIS IS NOT IN composer.json's `autoload.files`
+ *
+ * Composer keys every `files` entry by md5( "<package-name>:<relative-path>" )
+ * and records loaded entries in $GLOBALS['__composer_autoload_files'], which is
+ * shared by every autoloader in the PHP process. Two WordPress plugins that both
+ * vendor this package therefore produce the SAME key: the first plugin to boot
+ * requires its copy and flags the key, and every later plugin's autoloader skips
+ * its own copy entirely. Those plugins get a fatal "Call to undefined function
+ * wp_vite_enqueue()" — and prefixing the vendored copy (php-scoper and friends)
+ * does not help, because the key is derived from the package name, not the
+ * rewritten contents.
+ *
+ * Nothing inside a shared package can make `autoload.files` safe, so the globals
+ * are opt-in instead. `AssetManager::enqueue()` is PSR-4 and has never had the
+ * problem — prefer it.
  *
  * @package WpVite
  */

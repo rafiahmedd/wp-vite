@@ -9,9 +9,16 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 // ─── Option 1: Procedural (global helper functions) ──────────────────────────
 //
-// The simplest way — mirrors the reference package's API.
+// Opt-in: the globals are NOT autoloaded, because Composer's `autoload.files`
+// deduplicates by package name across the whole PHP process — so in a site with
+// two plugins vendoring this package, only the first one's copy would ever load.
+// One call, once, from your bootstrap:
+
+\WpVite\AssetManager::helpers();
 
 add_action('wp_enqueue_scripts', function (): void {
 

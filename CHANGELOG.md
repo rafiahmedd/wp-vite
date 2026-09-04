@@ -11,6 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] — 2026-09-04
+
+### Fixed
+
+- **Two plugins vendoring this package no longer fatal each other.** `autoload.files`
+  is keyed by `md5( "<package-name>:<relative-path>" )` and tracked in the
+  process-wide `$GLOBALS['__composer_autoload_files']`, so the first plugin to
+  boot loaded `src/functions.php` and every later plugin's autoloader skipped its
+  own copy — leaving them with `Call to undefined function wp_vite_enqueue()`.
+  Prefixing the vendored copy did not help; the key comes from the package name.
+  The package no longer declares `autoload.files` at all.
+- **The `@vite/client` script handle is derived from the dev server origin** instead
+  of the fixed `vite-client`. Two plugins running their own dev servers each got
+  one shot at that global WP registry key, and the loser silently loaded the
+  winner's dev server. The React Refresh preamble is likewise tracked per handle.
+
+### Changed — BREAKING
+
+- `wp_vite_enqueue()` / `wp_vite_register()` are opt-in. Either call
+  `WpVite\AssetManager::helpers()` once from your plugin bootstrap, or switch to
+  `AssetManager::enqueue()` / `AssetManager::register()` (recommended — PSR-4, and
+  never subject to any of this).
+- `DevServer::registerClient()` now returns the handle it registered.
+- `DevServer::CLIENT_HANDLE` is the handle *prefix*, not the handle. Use
+  `DevServer::clientHandle( $manifest )`.
+
+---
+
 ## [1.0.0] — 2026-04-01
 
 ### Added
@@ -45,5 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PHPCS config (`phpcs.xml.dist`) enforcing WordPress coding standards.
 - `.editorconfig` for consistent formatting.
 
-[Unreleased]: https://github.com/rafiahmedd/wp-vite/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/rafiahmedd/wp-vite/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/rafiahmedd/wp-vite/compare/v1.0.5...v2.0.0
 [1.0.0]: https://github.com/rafiahmedd/wp-vite/releases/tag/v1.0.0

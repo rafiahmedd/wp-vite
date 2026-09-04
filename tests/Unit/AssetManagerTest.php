@@ -12,6 +12,7 @@ namespace WpVite\Tests\Unit;
 
 use WpVite\AssetManager;
 use WpVite\DevServer;
+use WpVite\Manifest;
 use WpVite\Tests\WpViteTestCase;
 
 /**
@@ -35,7 +36,7 @@ class AssetManagerTest extends WpViteTestCase {
 
 		AssetManager::register( $dir, 'src/main.ts', array( 'handle' => 'my-plugin' ) );
 
-		$this->assertArrayHasKey( DevServer::CLIENT_HANDLE, $wp_scripts );
+		$this->assertArrayHasKey( DevServer::clientHandle( Manifest::load( $dir ) ), $wp_scripts );
 	}
 
 	public function test_register_in_dev_mode_registers_entry_script(): void {
@@ -69,7 +70,7 @@ class AssetManagerTest extends WpViteTestCase {
 		);
 
 		$deps = $wp_scripts['my-plugin']['deps'];
-		$this->assertContains( DevServer::CLIENT_HANDLE, $deps );
+		$this->assertContains( DevServer::clientHandle( Manifest::load( $dir ) ), $deps );
 		$this->assertContains( 'wp-element', $deps );
 	}
 
