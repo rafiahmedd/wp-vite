@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.1] — 2026-10-28
+
+### Fixed
+- `UrlResolver::resolve()` builds the right URL for a plugin whose folder is a
+  symlink. PHP reports such a plugin's real path, outside `WP_CONTENT_DIR`, so
+  the asset URL carried a filesystem path and every script 404'd. The resolver
+  now maps it back through WordPress's own symlink map
+  (`wp_register_plugin_realpath()` → `plugins_url()`).
+
+---
+
 ## [2.0.0] — 2026-09-04
 
 ### Fixed

@@ -41,6 +41,24 @@ class UrlResolverTest extends WpViteTestCase {
 		);
 	}
 
+	public function test_resolves_a_symlinked_plugin_through_wordpress_realpath_map(): void {
+		// The plugin folder is a symlink to a checkout elsewhere: __DIR__ reports the
+		// real path, which is not under WP_CONTENT_DIR, and the admin screen loaded
+		// its assets from a URL built out of a filesystem path (QA 2026-10-27 P12).
+		$GLOBALS['wp_plugin_paths'] = array(
+			'/var/www/html/wp-content/plugins/my-plugin' => '/Users/dev/src/my-plugin',
+		);
+
+		try {
+			$this->assertSame(
+				'https://example.com/wp-content/plugins/my-plugin/dist',
+				UrlResolver::resolve( '/Users/dev/src/my-plugin/dist' ),
+			);
+		} finally {
+			unset( $GLOBALS['wp_plugin_paths'] );
+		}
+	}
+
 	public function test_strips_trailing_slash(): void {
 		$dir = '/var/www/html/wp-content/plugins/my-plugin/dist/';
 		$url = UrlResolver::resolve( $dir );

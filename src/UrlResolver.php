@@ -28,7 +28,19 @@ class UrlResolver {
 	 */
 	public static function resolve( string $dir ): string {
 		$contentDir = wp_normalize_path( WP_CONTENT_DIR );
-		$assetDir   = wp_normalize_path( $dir );
+		$assetDir   = untrailingslashit( wp_normalize_path( $dir ) );
+
+		// A plugin folder that is a symlink reports its REAL path, outside
+		// WP_CONTENT_DIR, so stripping the content dir left a filesystem path in
+		// the URL. WordPress maps a symlinked plugin's real path back to its
+		// folder (wp_register_plugin_realpath()), and plugins_url() reads that map.
+		if ( strpos( $assetDir . '/', trailingslashit( $contentDir ) ) !== 0 && function_exists( 'plugins_url' ) ) {
+			$probe = $assetDir . '/index.php';
+
+			if ( plugin_basename( $probe ) !== ltrim( $probe, '/' ) ) {
+				return untrailingslashit( plugins_url( '', $probe ) );
+			}
+		}
 
 		$url = content_url( str_replace( $contentDir, '', $assetDir ) );
 
