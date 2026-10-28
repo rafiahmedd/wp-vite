@@ -61,6 +61,35 @@ function content_url( string $path = '' ): string {
 	return 'https://example.com/wp-content' . ( $path ? '/' . ltrim( $path, '/' ) : '' );
 }
 
+/**
+ * As core: a symlinked plugin's real path is mapped back to its folder under
+ * WP_PLUGIN_DIR through $wp_plugin_paths (wp_register_plugin_realpath()), then
+ * made relative to the plugins folder. An unmapped path outside it comes back
+ * absolute, minus its leading slash.
+ */
+function plugin_basename( string $file ): string {
+	$file = wp_normalize_path( $file );
+	foreach ( (array) ( $GLOBALS['wp_plugin_paths'] ?? array() ) as $dir => $realdir ) {
+		if ( strpos( $file, $realdir ) === 0 ) {
+			$file = $dir . substr( $file, strlen( $realdir ) );
+		}
+	}
+
+	return trim( preg_replace( '#^' . preg_quote( WP_CONTENT_DIR . '/plugins', '#' ) . '/#', '', $file ), '/' );
+}
+
+function plugins_url( string $path = '', string $plugin = '' ): string {
+	$url = 'https://example.com/wp-content/plugins';
+	if ( $plugin !== '' ) {
+		$folder = dirname( plugin_basename( $plugin ) );
+		if ( $folder !== '.' ) {
+			$url .= '/' . ltrim( $folder, '/' );
+		}
+	}
+
+	return $url . ( $path ? '/' . ltrim( $path, '/' ) : '' );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // JSON helper
 // ─────────────────────────────────────────────────────────────────────────────
