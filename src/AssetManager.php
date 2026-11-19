@@ -199,8 +199,12 @@ class AssetManager {
 			'styles'  => array(),
 		);
 
-		// ── Main script ──────────────────────────────────────────────────────
-		if ( ! $opts->cssOnly ) {
+		// ── Stylesheet entry (e.g. src/scss/main.scss) ─────────────────────
+		// Vite records its CSS in `file` with no `css` array, and there is no script.
+		if ( str_ends_with( $item->file, '.css' ) ) {
+			self::registerStylesheets( array( $item->file ), $baseUrl, $opts, $assets );
+		} elseif ( ! $opts->cssOnly ) {
+			// ── Main script ──────────────────────────────────────────────────
 			ScriptModuleFilter::apply( $opts->handle );
 
 			// Version is embedded in the filename by Vite — no need to pass one.
