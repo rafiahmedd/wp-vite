@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- A stylesheet used directly as a Vite entry (`input: { main: 'src/scss/main.scss' }`)
+  now gets its CSS registered in production. Vite records such an entry as
+  `{ "file": "assets/main-xxx.css", "isEntry": true }` with no `css` array, so
+  nothing was registered and, with `css-only`, the page got no CSS. The `.css`
+  file is now registered as a style (handle `{handle}-{slug}`, as for other
+  CSS) and no script is registered for it, with or without `css-only`.
+
 ---
 
 ## [2.0.1] — 2026-10-28

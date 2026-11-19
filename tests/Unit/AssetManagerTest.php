@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace WpVite\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use WpVite\AssetManager;
 use WpVite\DevServer;
 use WpVite\Manifest;
@@ -130,6 +131,46 @@ class AssetManagerTest extends WpViteTestCase {
 		$this->assertEmpty( $assets['scripts'] );
 		$this->assertArrayNotHasKey( 'my-plugin-css', $wp_scripts );
 		$this->assertNotEmpty( $assets['styles'] );
+	}
+
+	/**
+	 * A stylesheet entry (`input: { main: 'src/scss/main.scss' }`) is recorded
+	 * with its CSS in `file` and no `css` array.
+	 */
+	#[DataProvider( 'cssOnlyProvider' )]
+	public function test_stylesheet_entry_registers_its_file_as_a_style( bool $cssOnly ): void {
+		global $wp_scripts, $wp_styles;
+
+		$dir = $this->makeProdBuildDir(
+			array(
+				'src/scss/main.scss' => array(
+					'file'    => 'assets/main-Xyz789.css',
+					'src'     => 'src/scss/main.scss',
+					'isEntry' => true,
+				),
+			)
+		);
+
+		$assets = AssetManager::register(
+			$dir,
+			'src/scss/main.scss',
+			array(
+				'handle'   => 'my-theme',
+				'css-only' => $cssOnly,
+			)
+		);
+
+		$this->assertSame( array(), $assets['scripts'] );
+		$this->assertArrayNotHasKey( 'my-theme', $wp_scripts );
+		$this->assertSame( array( 'my-theme-main-xyz789' ), $assets['styles'] );
+		$this->assertStringEndsWith( '/assets/main-Xyz789.css', $wp_styles['my-theme-main-xyz789']['src'] );
+	}
+
+	public static function cssOnlyProvider(): array {
+		return array(
+			'css-only' => array( true ),
+			'default'  => array( false ),
+		);
 	}
 
 	public function test_css_dependencies_applied_to_styles(): void {
