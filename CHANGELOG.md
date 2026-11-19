@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.0.3] — 2026-11-20
+
 ### Fixed
 - A stylesheet used directly as a Vite entry (`input: { main: 'src/scss/main.scss' }`)
   now gets its CSS registered in production. Vite records such an entry as
@@ -92,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PHPCS config (`phpcs.xml.dist`) enforcing WordPress coding standards.
 - `.editorconfig` for consistent formatting.
 
-[Unreleased]: https://github.com/rafiahmedd/wp-vite/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/rafiahmedd/wp-vite/compare/v2.0.3...HEAD
+[2.0.3]: https://github.com/rafiahmedd/wp-vite/compare/v2.0.2...v2.0.3
 [2.0.0]: https://github.com/rafiahmedd/wp-vite/compare/v1.0.5...v2.0.0
 [1.0.0]: https://github.com/rafiahmedd/wp-vite/releases/tag/v1.0.0
